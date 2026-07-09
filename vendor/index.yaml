@@ -2205,3 +2205,10 @@ vendors:
   - id: aqualinks
     name: Aqualinks
     website: https://aqualinks.es
+
+  - id: evrlast
+    name: Tagback GmbH & Co. KG
+    website: https://tagback.de
+    social:
+      linkedin: https://de.linkedin.com/company/tagback
+      instagram: https://www.instagram.com/evrlast_de

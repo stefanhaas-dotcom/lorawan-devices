@@ -1,0 +1,108 @@
+name: AS2-LB2 - Ultrasonic Water Level Sensor
+description: This autonomous station provides continuous, reliable, and maintenance-free monitoring of water levels in both flowing and standing bodies of water using ultrasonic sensing. To continuously capture the exact water level, the station can be calibrated to a reference height (e.g. gauge zero point) after mounting. It measures height differences of up to 10 m with an accuracy of 5 mm (at 5 m) / 10 mm (at 10 m), is mounted above the body of water, and is powered by a battery and solar cell for fully maintenance-free operation.
+
+# Hardware versions (optional)
+hardwareVersions:
+  - version: '1.0'
+    numeric: 1
+
+# Firmware versions (at least one is mandatory)
+firmwareVersions:
+  - # Firmware version
+    version: '1.0'
+    numeric: 1
+    # Supported hardware versions (optional)
+    hardwareVersions:
+      - '1.0' # Must refer to hardwareVersions declared above
+    # LoRaWAN Device Profiles per region
+    # Supported regions: EU863-870, US902-928, AU915-928, AS923, CN779-787, EU433, CN470-510, KR920-923, IN865-867, RU864-870
+    features:
+      - transmission interval
+    profiles:
+       EU863-870:
+        id: as2-lb2-profile-eu868
+        lorawanCertified: false
+        codec: evrlast-device-codec
+
+# Sensors that this device features (optional)
+# Valid values are:
+# 4-20 ma, accelerometer, altitude, analog input, auxiliary, barometer, battery, button, bvoc, co, co2, conductivity,
+# current, digital input, dissolved oxygen, distance, dust, energy, gps, gyroscope, h2s, humidity, iaq, level, light,
+# lightning, link, magnetometer, moisture, motion, no, no2, o3, particulate matter, ph, pir, pm2.5, pm10, potentiometer,
+# power, precipitation, pressure, proximity, pulse count, pulse frequency, radar, rainfall, rssi, smart valve, snr, so2,
+# solar radiation, sound, strain, surface temperature, temperature, tilt, time, tvoc, uv, vapor pressure, velocity,
+# vibration, voltage, water potential, water, weight, wifi ssid, wind direction, wind speed.
+sensors:
+  - battery
+  - distance
+
+# Additional radios that this device has (optional)
+# Valid values are: ble, nfc, wifi, cellular.
+#additionalRadios:
+#  -
+
+# Bridge interfaces (optional)
+# Valid values are: modbus, m-bus, can bus, rs-485, sdi-12, analog.
+bridgeInterfaces:
+  - analog
+
+# Dimensions in mm (optional)
+# Use width, height, length and/or diameter
+#dimensions:
+#  width:
+#  length:
+#  height:
+
+# Weight in grams (optional)
+#weight:
+
+# Battery information (optional)
+#battery:
+#  replaceable:
+#  type:
+
+# Operating conditions (optional)
+#operatingConditions:
+#  # Temperature (Celsius)
+#  temperature:
+#    min:
+#    max:
+#  # Relative humidity (fraction of 1)
+#  relativeHumidity:
+#    min:
+#    max:
+
+# IP rating (optional)
+ipCode: IP65
+
+# Key provisioning (optional)
+# Valid values are: custom (user can configure keys), join server and manifest.
+#keyProvisioning:
+#  -
+
+# Key programming (optional)
+# Valid values are: bluetooth, nfc, wifi, serial (when the user has a serial interface to set the keys)
+# and firmware (when the user should change the firmware to set the keys).
+#keyProgramming:
+#  -
+
+# Key security (optional)
+# Valid values are: none, read protected and secure element.
+#keySecurity:
+
+# Firmware programming (optional)
+# Valid values are: serial (when the user has a serial interface to update the firmware), fuota lorawan (when the device
+# supports LoRaWAN FUOTA via standard interfaces) and fuota other (other wireless update mechanism).
+#firmwareProgramming:
+#  -
+
+# Product and data sheet URLs (optional)
+#productURL:
+#dataSheetURL:
+
+# Photos (MAKE SURE THE IMAGE HAS A TRANSPARENT BACKGROUND)
+photos:
+  main: as2-lc1_front_straight.png
+  other:
+    - as2-lc1_front_top.png
+    - as2-lc1_front_bottom.png
