@@ -1,19 +1,19 @@
-name: AS2-LA1 - Soil Moisture & Temperature Sensor
-description: This autonomous station provides continuous, reliable, and maintenance-free monitoring of soil moisture and/or soil temperature. Up to four sensors can be connected simultaneously, for example to capture readings from different soil depths. The station is mounted above ground while the sensors can be buried, operates maintenance-free, and is powered by a battery and solar cell.
+name: AS2-LA1 – Soil Moisture and Temperature Monitoring Station
+description: Autonomous station for continuous monitoring of soil moisture and soil temperature. Soil moisture is measured with a Pino-Tech SoilWatch 10 probe (corrosion-resistant 75 MHz capacitive probe, analog 0–3 V output, 10 m cable). Soil temperature is measured with a DS18B20 probe over a range of -55 to +105 °C with an accuracy of ±0.5 °C (-10 to +85 °C), also on a 10 m cable. Up to four probes can be connected, e.g., to capture readings from different soil depths. Besides the two included probes, any analog 3 V sensor can be added. The station is mounted above ground, while the probes are buried. Limits can be created in the evrlast Config Generator and sent to the station as a downlink, so that the station stores them and triggers an alarm itself when a limit is exceeded. Powered by a battery and a solar cell, the station operates maintenance-free.
 
 # Hardware versions (optional)
 hardwareVersions:
-  - version: '1.0'
-    numeric: 1
+  - version: '5.0'
+    numeric: 5
 
 # Firmware versions (at least one is mandatory)
 firmwareVersions:
   - # Firmware version
-    version: '1.0'
-    numeric: 1
+    version: '3.0.0'
+    numeric: 3
     # Supported hardware versions (optional)
     hardwareVersions:
-      - '1.0' # Must refer to hardwareVersions declared above
+      - '5.0' # Must refer to hardwareVersions declared above
     # LoRaWAN Device Profiles per region
     # Supported regions: EU863-870, US902-928, AU915-928, AS923, CN779-787, EU433, CN470-510, KR920-923, IN865-867, RU864-870
     features:
@@ -36,11 +36,6 @@ sensors:
   - moisture
   - temperature
   - battery
-
-# Additional radios that this device has (optional)
-# Valid values are: ble, nfc, wifi, cellular.
-#additionalRadios:
-#  -
 
 # Bridge interfaces (optional)
 # Valid values are: modbus, m-bus, can bus, rs-485, sdi-12, analog.
@@ -69,9 +64,9 @@ operatingConditions:
     min: -20
     max: +65
   # Relative humidity (fraction of 1)
-  #relativeHumidity:
-  #  min:
-  #  max:
+  relativeHumidity:
+    min: 0
+    max: 0.95
 
 # IP rating (optional)
 ipCode: IP67
@@ -79,13 +74,7 @@ ipCode: IP67
 # Key provisioning (optional)
 # Valid values are: custom (user can configure keys), join server and manifest.
 keyProvisioning:
-  - custom
-
-# Key programming (optional)
-# Valid values are: bluetooth, nfc, wifi, serial (when the user has a serial interface to set the keys)
-# and firmware (when the user should change the firmware to set the keys).
-keyProgramming:
-  - firmware
+  - manifest
 
 # Key security (optional)
 # Valid values are: none, read protected and secure element.
@@ -95,12 +84,13 @@ keySecurity: read protected
 # Valid values are: serial (when the user has a serial interface to update the firmware), fuota lorawan (when the device
 # supports LoRaWAN FUOTA via standard interfaces) and fuota other (other wireless update mechanism).
 firmwareProgramming:
-  - fuota lorawan
+  - serial
+  - fuota other
 
 # Product and data sheet URLs (optional)
 productURL: https://www.tagback.de/produkt/bodenfeuchte-messstation/
-#dataSheetURL:
+dataSheetURL: https://docs.evrlast.com/manuals/stationen/bodenfeuchte/
 
 # Photos (MAKE SURE THE IMAGE HAS A TRANSPARENT BACKGROUND)
 photos:
-  main: as1_ld2_front_straight.png
+  main: as2-la1_front_straight.png

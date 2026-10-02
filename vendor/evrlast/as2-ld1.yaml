@@ -1,19 +1,19 @@
-name: AS2-LD1 - Air Quality Station (Particulate Matter)
-description: This autonomous station provides continuous, reliable, and maintenance-free monitoring of particulate matter concentration using a digital sensor. It measures particle sizes across three ranges (0.3-1.0 µm, 1.0-2.5 µm, and 2.5-10 µm) with a particle counting efficiency of 50% at 0.3 µm and 98% at ≥0.5 µm. For the PM2.5 standard, the effective measurement range is 0-500 µg/m³ (maximum ≥1000 µg/m³) with a resolution of 1 µg/m³ and a maximum deviation of ±10% (100-500 µg/m³) or ±10 µg/m³ (0-100 µg/m³), using a standard sample air volume of 100 ml. The station operates maintenance-free and is powered by a battery and solar cell.
+name: AS2-LD1 – Particulate Matter Monitoring Station
+description: Autonomous station for continuous monitoring of particulate matter concentration in ambient air. A digital sensor counts particles in three size ranges (0.3–1.0 µm, 1.0–2.5 µm and 2.5–10 µm) with a counting efficiency of 50 % at 0.3 µm and 98 % at ≥0.5 µm. For PM2.5 mass concentration, the effective measuring range is 0–500 µg/m³ with a resolution of 1 µg/m³ and a maximum deviation of ±10 µg/m³ (0–100 µg/m³) or ±10 % (100–500 µg/m³), based on a standard sample air volume of 100 ml. Concentrations of 1000 µg/m³ and above can still be detected beyond the specified range. Limits can be created in the evrlast Config Generator and sent to the station as a downlink, so that the station stores them and triggers an alarm itself when a limit is exceeded. Powered by a battery and a solar cell, the station operates maintenance-free.
 
 # Hardware versions (optional)
 hardwareVersions:
-  - version: '1.0'
-    numeric: 1
+  - version: '5.0'
+    numeric: 5
 
 # Firmware versions (at least one is mandatory)
 firmwareVersions:
   - # Firmware version
-    version: '1.0'
-    numeric: 1
+    version: '3.0.0'
+    numeric: 3
     # Supported hardware versions (optional)
     hardwareVersions:
-      - '1.0' # Must refer to hardwareVersions declared above
+      - '5.0' # Must refer to hardwareVersions declared above
     # LoRaWAN Device Profiles per region
     # Supported regions: EU863-870, US902-928, AU915-928, AS923, CN779-787, EU433, CN470-510, KR920-923, IN865-867, RU864-870
     features:
@@ -38,16 +38,6 @@ sensors:
   - pm10
   - battery
 
-# Additional radios that this device has (optional)
-# Valid values are: ble, nfc, wifi, cellular.
-#additionalRadios:
-#  -
-
-# Bridge interfaces (optional)
-# Valid values are: modbus, m-bus, can bus, rs-485, sdi-12, analog.
-bridgeInterfaces:
-  - analog
-
 # Dimensions in mm (optional)
 # Use width, height, length and/or diameter
 dimensions:
@@ -67,12 +57,12 @@ battery:
 operatingConditions:
   # Temperature (Celsius)
   temperature:
-    min: -20
-    max: +65
+    min: -10
+    max: +60
   # Relative humidity (fraction of 1)
-  #relativeHumidity:
-  #  min:
-  #  max:
+  relativeHumidity:
+    min: 0
+    max: 0.95
 
 # IP rating (optional)
 ipCode: IP67
@@ -80,13 +70,7 @@ ipCode: IP67
 # Key provisioning (optional)
 # Valid values are: custom (user can configure keys), join server and manifest.
 keyProvisioning:
-  - custom
-
-# Key programming (optional)
-# Valid values are: bluetooth, nfc, wifi, serial (when the user has a serial interface to set the keys)
-# and firmware (when the user should change the firmware to set the keys).
-keyProgramming:
-  - firmware
+  - manifest
 
 # Key security (optional)
 # Valid values are: none, read protected and secure element.
@@ -96,12 +80,13 @@ keySecurity: read protected
 # Valid values are: serial (when the user has a serial interface to update the firmware), fuota lorawan (when the device
 # supports LoRaWAN FUOTA via standard interfaces) and fuota other (other wireless update mechanism).
 firmwareProgramming:
-  - fuota lorawan
+  - serial
+  - fuota other
 
 # Product and data sheet URLs (optional)
-productURL: https://www.tagback.de/produkt/bodenfeuchte-messstation/
-#dataSheetURL:
+productURL: https://www.tagback.de/produkt/feinstaub-messstation/
+dataSheetURL: https://docs.evrlast.com/manuals/stationen/feinstaub/
 
 # Photos (MAKE SURE THE IMAGE HAS A TRANSPARENT BACKGROUND)
 photos:
-  main: as2_le1_front_straight.png
+  main: as2-ld1_front_straight.png

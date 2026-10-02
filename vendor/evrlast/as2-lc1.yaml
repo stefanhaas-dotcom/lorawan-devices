@@ -1,19 +1,19 @@
-name: AS2-LC1 - Radar Water Level Sensor
-description: This autonomous station provides continuous, reliable, and maintenance-free monitoring of water levels in both flowing and standing bodies of water using radar sensing. To continuously capture the exact water level, the station can be calibrated to a reference height (e.g. gauge zero point) after mounting. It measures height differences of up to 23 m with an accuracy of up to 3 mm, is mounted above the body of water, and is powered by a battery and solar cell for fully maintenance-free operation.
+name: AS2-LC1 – Water Level (Radar) Monitoring Station
+description: Autonomous station for continuous monitoring of water levels in flowing and standing bodies of water. The water level is measured by radar sensing over a range of 30 cm (blind zone) to 23 m (distance to the water surface) with an accuracy of ±3 mm. The station is mounted above the body of water and can be calibrated to a reference height (e.g., gauge zero point) after mounting. Limits can be created in the evrlast Config Generator and sent to the station as a downlink, so that the station stores them and triggers an alarm itself when a limit is exceeded. Powered by a battery and a solar cell, the station operates maintenance-free.
 
 # Hardware versions (optional)
 hardwareVersions:
-  - version: '1.0'
-    numeric: 1
+  - version: '5.0'
+    numeric: 5
 
 # Firmware versions (at least one is mandatory)
 firmwareVersions:
   - # Firmware version
-    version: '1.0'
-    numeric: 1
+    version: '3.0.0'
+    numeric: 3
     # Supported hardware versions (optional)
     hardwareVersions:
-      - '1.0' # Must refer to hardwareVersions declared above
+      - '5.0' # Must refer to hardwareVersions declared above
     # LoRaWAN Device Profiles per region
     # Supported regions: EU863-870, US902-928, AU915-928, AS923, CN779-787, EU433, CN470-510, KR920-923, IN865-867, RU864-870
     features:
@@ -34,17 +34,7 @@ firmwareVersions:
 sensors:
   - battery
   - distance
-  - radar
-
-# Additional radios that this device has (optional)
-# Valid values are: ble, nfc, wifi, cellular.
-#additionalRadios:
- 
-
-# Bridge interfaces (optional)
-# Valid values are: modbus, m-bus, can bus, rs-485, sdi-12, analog.
-bridgeInterfaces:
-  - analog
+  - level
 
 # Dimensions in mm (optional)
 # Use width, height, length and/or diameter
@@ -68,9 +58,9 @@ operatingConditions:
     min: -20
     max: +65
   # Relative humidity (fraction of 1)
-  #relativeHumidity:
-  #  min: 
-  #  max:
+  relativeHumidity:
+    min: 0
+    max: 0.95
 
 # IP rating (optional)
 ipCode: IP67
@@ -78,13 +68,7 @@ ipCode: IP67
 # Key provisioning (optional)
 # Valid values are: custom (user can configure keys), join server and manifest.
 keyProvisioning:
-  - custom
-
-# Key programming (optional)
-# Valid values are: bluetooth, nfc, wifi, serial (when the user has a serial interface to set the keys)
-# and firmware (when the user should change the firmware to set the keys).
-keyProgramming:
-  - firmware
+  - manifest
 
 # Key security (optional)
 # Valid values are: none, read protected and secure element.
@@ -94,12 +78,13 @@ keySecurity: read protected
 # Valid values are: serial (when the user has a serial interface to update the firmware), fuota lorawan (when the device
 # supports LoRaWAN FUOTA via standard interfaces) and fuota other (other wireless update mechanism).
 firmwareProgramming:
-  - fuota lorawan
+  - serial
+  - fuota other
 
 # Product and data sheet URLs (optional)
 productURL: https://www.tagback.de/produkt/pegel-messstation-radar/
-dataSheetURL: https://docs.evrlast.com/manuals/pegel/ultraschall/
+dataSheetURL: https://docs.evrlast.com/manuals/pegel/radar/
 
 # Photos (MAKE SURE THE IMAGE HAS A TRANSPARENT BACKGROUND)
-photos: 
-  main: radar_front_straight.png
+photos:
+  main: as2-lc1_front_straight.png

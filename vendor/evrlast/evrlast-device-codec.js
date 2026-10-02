@@ -1,84 +1,187 @@
- // Please read here on how to implement the proper codec: https://www.thethingsindustries.com/docs/integrations/payload-formatters/javascript/
-function decodeUplink(input) {                                                                                                                                      
-    var data = input.bytes;                                                                                                                                           
-    var pos = 0;
+// Evrlast uplink codec.
+//
+// The uplink payload is a length-delimited Protobuf message. Every entry of the repeated field 1
+// is a measurement with the fields identifier (1), value (2) and port (3), all encoded as int32 varints.
+// The device sends every value multiplied by 100. The identifier is the sensor type, see
+// https://docs.evrlast.com/lorawan/decoder/decoder/ for the list of identifiers.
+//
+// Protobuf omits fields that have their default value 0, so a missing field is read as 0.
 
-    function readVarint() {
-      var result = 0, shift = 0;
-      while (pos < data.length) {                                                                                                                                     
-        var byte = data[pos++];
-        result |= (byte & 0x7F) << shift;                                                                                                                             
-        if ((byte & 0x80) === 0) break;
-        shift += 7;
-      }                                                                                                                                                               
-      return result;
-    }                                                                                                                                                                 
-                  
-    function readBytes() {
-      var len = readVarint();
-      var bytes = data.slice(pos, pos + len);
-      pos += len;
-      return bytes;
+var VALUE_SCALE = 100;
+
+// Reads a varint and returns its lowest 32 bits as unsigned number. A negative int32 is sent as
+// 10 bytes (sign extended to 64 bits), the bytes after the 5th one carry no further information.
+// Plain arithmetic is used because the bitwise operators of JavaScript only work on 32 bits.
+function readVarint(state) {
+  var low = 0;
+  var factor = 1;
+  for (var i = 0; i < 10; i++) {
+    if (state.pos >= state.end) {
+      throw new Error('payload ends inside of a varint');
     }
-                                                                                                                                                                      
-    var msgBytes = readBytes();
-    var msgPos = 0;                                                                                                                                                   
-                  
-    function msgReadVarint() {
-      var result = 0, shift = 0;
-      while (msgPos < msgBytes.length) {
-        var byte = msgBytes[msgPos++];
-        result |= (byte & 0x7F) << shift;                                                                                                                             
-        if ((byte & 0x80) === 0) break;
-        shift += 7;                                                                                                                                                   
-      }           
-      return result;
+    var byte = state.bytes[state.pos++];
+    if (i < 5) {
+      low += (byte & 0x7f) * factor;
+      factor *= 128;
+    }
+    if ((byte & 0x80) === 0) {
+      return low % 4294967296;
+    }
+  }
+  throw new Error('varint is longer than 10 bytes');
+}
+
+function toInt32(unsigned) {
+  return unsigned >= 2147483648 ? unsigned - 4294967296 : unsigned;
+}
+
+// Reads the length of a length-delimited field and returns the position after the field.
+function readLengthEnd(state) {
+  var length = readVarint(state);
+  var end = state.pos + length;
+  if (end > state.end) {
+    throw new Error('field of ' + length + ' bytes exceeds the payload');
+  }
+  return end;
+}
+
+// Skips the value of a field with an unexpected field number or wire type.
+function skipField(state, wireType) {
+  switch (wireType) {
+    case 0:
+      readVarint(state);
+      return;
+    case 1:
+      state.pos += 8;
+      break;
+    case 2:
+      state.pos = readLengthEnd(state);
+      return;
+    case 5:
+      state.pos += 4;
+      break;
+    default:
+      throw new Error('unsupported wire type ' + wireType);
+  }
+  if (state.pos > state.end) {
+    throw new Error('payload ends inside of a field');
+  }
+}
+
+function decodeMeasurement(bytes, start, end, warnings) {
+  var state = { bytes: bytes, pos: start, end: end };
+  var measurement = { identifier: 0, value: 0, port: 0 };
+  var names = { 1: 'identifier', 2: 'value', 3: 'port' };
+
+  while (state.pos < state.end) {
+    var tag = readVarint(state);
+    var fieldNumber = Math.floor(tag / 8);
+    var wireType = tag % 8;
+    var name = names[fieldNumber];
+
+    if (name !== undefined && wireType === 0) {
+      var raw = toInt32(readVarint(state));
+      measurement[name] = name === 'value' ? raw / VALUE_SCALE : raw;
+    } else {
+      warnings.push('ignored unknown field ' + fieldNumber + ' (wire type ' + wireType + ') of a measurement');
+      skipField(state, wireType);
+    }
+  }
+  return measurement;
+}
+
+function decodeUplink(input) {
+  var bytes = input.bytes;
+  var warnings = [];
+  var measurements = [];
+
+  if (!bytes || bytes.length === 0) {
+    return { data: {}, errors: ['payload is empty'] };
+  }
+
+  try {
+    var state = { bytes: bytes, pos: 0, end: bytes.length };
+    var messageLength = readVarint(state);
+    if (state.pos + messageLength > bytes.length) {
+      warnings.push('declared message length ' + messageLength + ' exceeds the payload, decoding the available bytes');
+    } else {
+      state.end = state.pos + messageLength;
     }
 
-    function msgReadBytes() {                                                                                                                                         
-      var len = msgReadVarint();
-      var bytes = msgBytes.slice(msgPos, msgPos + len);                                                                                                               
-      msgPos += len;
-      return bytes;
-    }
+    while (state.pos < state.end) {
+      var tag = readVarint(state);
+      var fieldNumber = Math.floor(tag / 8);
+      var wireType = tag % 8;
 
-    var sensors = [];
-    while (msgPos < msgBytes.length) {
-      var tag = msgReadVarint();                                                                                                                                      
-      var fieldNum = tag >> 3, wireType = tag & 7;
-                                                                                                                                                                      
-      if (fieldNum === 1 && wireType === 2) {
-        var valueBytes = msgReadBytes();
-        var vPos = 0;                                                                                                                                                 
-   
-        function vReadVarint() {                                                                                                                                      
-          var result = 0, shift = 0;
-          while (vPos < valueBytes.length) {
-            var byte = valueBytes[vPos++];
-            result |= (byte & 0x7F) << shift;
-            if ((byte & 0x80) === 0) break;                                                                                                                           
-            shift += 7;
-          }                                                                                                                                                           
-          return result;
-        }
-
-        var value = {};
-        while (vPos < valueBytes.length) {
-          var vTag = vReadVarint();
-          var vFieldNum = vTag >> 3;                                                                                                                                  
-   
-          if (vFieldNum === 1) value.identifier = vReadVarint();                                                                                                      
-          else if (vFieldNum === 2) value.value = vReadVarint(); 
-          else if (vFieldNum === 3) value.port = vReadVarint();                                                                                                       
-        }                                                                                                                                                             
-                                                                                                                                                                      
-        sensors.push(value);                                                                                                                                          
-      }           
-    }
-
-    return {
-      data: {
-        measurementValues: sensors
+      if (fieldNumber === 1 && wireType === 2) {
+        var end = readLengthEnd(state);
+        measurements.push(decodeMeasurement(bytes, state.pos, end, warnings));
+        state.pos = end;
+      } else {
+        warnings.push('ignored unknown field ' + fieldNumber + ' (wire type ' + wireType + ')');
+        skipField(state, wireType);
       }
-    };
+    }
+  } catch (e) {
+    return { data: {}, errors: [e.message] };
+  }
+
+  var result = { data: { measurementValues: measurements } };
+  if (warnings.length > 0) {
+    result.warnings = warnings;
+  }
+  return result;
+}
+
+// Maps the sensor identifiers that have an equivalent in the normalized payload.
+function normalizeUplink(input) {
+  var values = (input.data && input.data.measurementValues) || [];
+  var warnings = [];
+  var air = {};
+  var soil = {};
+
+  function set(target, key, value, measurement) {
+    if (target[key] === undefined) {
+      target[key] = value;
+    } else {
+      warnings.push('ignored additional value for ' + key + ' of sensor identifier ' + measurement.identifier +
+        ' on port ' + measurement.port);
+    }
+  }
+
+  values.forEach(function (m) {
+    switch (m.identifier) {
+      case 0: // temperature in °C
+        set(air, 'temperature', m.value, m);
+        break;
+      case 4: // relative humidity in %
+        set(air, 'relativeHumidity', m.value, m);
+        break;
+      case 5: // air pressure, the device sends Pa and the normalized payload uses hPa
+        set(air, 'pressure', m.value / 100, m);
+        break;
+      case 11: // soil moisture in %
+        set(soil, 'moisture', m.value, m);
+        break;
+      case 17: // external temperature, the soil temperature probe in °C
+        set(soil, 'temperature', m.value, m);
+        break;
+      default:
+        break;
+    }
+  });
+
+  var data = [];
+  if (Object.keys(air).length > 0) {
+    data.push({ air: air });
+  }
+  if (Object.keys(soil).length > 0) {
+    data.push({ soil: soil });
+  }
+
+  var result = { data: data };
+  if (warnings.length > 0) {
+    result.warnings = warnings;
+  }
+  return result;
 }
