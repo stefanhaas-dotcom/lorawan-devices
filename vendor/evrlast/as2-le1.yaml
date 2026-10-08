@@ -38,16 +38,6 @@ sensors:
   - humidity
   - battery
 
-# Dimensions in mm (optional)
-# Use width, height, length and/or diameter
-dimensions:
-  width: 115
-  length: 110
-  height: 113
-
-# Weight in grams (optional)
-weight: 350
-
 # Battery information (optional)
 battery:
   replaceable: false
