@@ -1,5 +1,5 @@
 name: AS2-LD1 – Particulate Matter Monitoring Station
-description: Autonomous station for continuous monitoring of particulate matter concentration in ambient air. A digital sensor counts particles in three size ranges (0.3–1.0 µm, 1.0–2.5 µm and 2.5–10 µm) with a counting efficiency of 50 % at 0.3 µm and 98 % at ≥0.5 µm. For PM2.5 mass concentration, the effective measuring range is 0–500 µg/m³ with a resolution of 1 µg/m³ and a maximum deviation of ±10 µg/m³ (0–100 µg/m³) or ±10 % (100–500 µg/m³), based on a standard sample air volume of 100 ml. Concentrations of 1000 µg/m³ and above can still be detected beyond the specified range. Limits can be created in the evrlast Config Generator and sent to the station as a downlink, so that the station stores them and triggers an alarm itself when a limit is exceeded. Powered by a battery and a solar cell, the station operates maintenance-free.
+description: Autonomous station for continuous monitoring of particulate matter concentration in ambient air. A digital sensor counts particles in three size ranges (0.3–1.0 µm, 1.0–2.5 µm and 2.5–10 µm) with a counting efficiency of 50 % at 0.3 µm and 98 % at ≥0.5 µm. For PM2.5 mass concentration, the effective measuring range is 0–500 µg/m³ with a resolution of 1 µg/m³ and a maximum deviation of ±10 µg/m³ (0–100 µg/m³) or ±10 % (100–500 µg/m³), based on a standard sample air volume of 100 ml. Concentrations of 1000 µg/m³ and above can still be detected beyond the specified range. The station housing is rated IP67, while the open lower layer is rated IP42. Limits can be created in the evrlast Config Generator and sent to the station as a downlink, so that the station stores them and triggers an alarm itself when a limit is exceeded. Powered by a battery and a solar cell, the station operates maintenance-free.
 
 # Hardware versions (optional)
 hardwareVersions:
@@ -55,7 +55,7 @@ operatingConditions:
     max: 0.95
 
 # IP rating (optional)
-ipCode: IP44
+ipCode: IP67
 
 # Key provisioning (optional)
 # Valid values are: custom (user can configure keys), join server and manifest.
