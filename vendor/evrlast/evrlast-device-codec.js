@@ -2,8 +2,10 @@
 //
 // The uplink payload is a length-delimited Protobuf message. Every entry of the repeated field 1
 // is a measurement with the fields identifier (1), value (2) and port (3), all encoded as int32 varints.
-// The device sends every value multiplied by 100. The identifier is the sensor type, see
-// https://docs.evrlast.com/lorawan/decoder/decoder/ for the list of identifiers.
+// The device sends every value multiplied by 100 and decodeUplink returns the values unchanged, the
+// Evrlast Cloud divides them by 100. normalizeUplink returns the values in their physical unit.
+// The identifier is the sensor type, see https://docs.evrlast.com/lorawan/decoder/decoder/ for the
+// list of identifiers.
 //
 // Protobuf omits fields that have their default value 0, so a missing field is read as 0.
 
@@ -82,7 +84,7 @@ function decodeMeasurement(bytes, start, end, warnings) {
 
     if (name !== undefined && wireType === 0) {
       var raw = toInt32(readVarint(state));
-      measurement[name] = name === 'value' ? raw / VALUE_SCALE : raw;
+      measurement[name] = raw;
     } else {
       warnings.push('ignored unknown field ' + fieldNumber + ' (wire type ' + wireType + ') of a measurement');
       skipField(state, wireType);
@@ -170,24 +172,25 @@ function normalizeUplink(input) {
   }
 
   values.forEach(function (m) {
+    var value = m.value / VALUE_SCALE;
     switch (m.identifier) {
       case 3: // battery voltage in V
-        set(device, 'battery', m.value, m);
+        set(device, 'battery', value, m);
         break;
       case 0: // temperature in °C
-        set(air, 'temperature', m.value, m);
+        set(air, 'temperature', value, m);
         break;
       case 4: // relative humidity in %
-        set(air, 'relativeHumidity', m.value, m);
+        set(air, 'relativeHumidity', value, m);
         break;
       case 5: // air pressure, the device sends Pa and the normalized payload uses hPa
-        set(air, 'pressure', m.value / 100, m);
+        set(air, 'pressure', value / 100, m);
         break;
       case 11: // soil moisture in %
-        set(soil, 'moisture', m.value, m);
+        set(soil, 'moisture', value, m);
         break;
       case 17: // external temperature, the soil temperature probe in °C
-        set(soil, 'temperature', m.value, m);
+        set(soil, 'temperature', value, m);
         break;
       default:
         break;

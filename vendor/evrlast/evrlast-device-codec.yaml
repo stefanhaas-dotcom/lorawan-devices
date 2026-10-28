@@ -16,15 +16,15 @@ uplinkDecoder:
             - identifier: 40
               value: 0
             - identifier: 3
-              value: 4.06
+              value: 406
             - identifier: 7
-              value: 4.46
+              value: 446
             - identifier: 32
-              value: 1
+              value: 100
             - identifier: 6
-              value: 24.85
+              value: 2485
             - identifier: 38
-              value: 1
+              value: 100
       # Normalized output, uses the normalizeUplink function (optional)
       normalizedOutput:
         data:
@@ -37,16 +37,16 @@ uplinkDecoder:
         data:
           measurementValues:
             - identifier: 0
-              value: -5.25
+              value: -525
             - identifier: 4
-              value: 55.5
+              value: 5550
             - identifier: 5
-              value: 101325
+              value: 10132500
             - identifier: 11
-              value: 33.21
+              value: 3321
               port: 1
             - identifier: 17
-              value: 12.75
+              value: 1275
               port: 2
       # Normalized output, uses the normalizeUplink function (optional)
       normalizedOutput:
