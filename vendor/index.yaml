@@ -2209,6 +2209,8 @@ vendors:
   - id: evrlast
     name: Tagback GmbH & Co. KG
     website: https://tagback.de/evrlast/
+    logo: app_icon_no_text_transparent.svg
+    description: evrlast is a cloud-based IoT platform that connects both LoRaWAN and NB-IoT stations. evrlast offers a wide range of features, including MQTT and HTTP data forwarding. Because evrlast stations and the platform can work with practically any kind of sensor, the application areas are very broad.
     social:
       linkedin: https://de.linkedin.com/company/tagback
-      instagram: https://www.instagram.com/evrlast_de
+      instagram: evrlast_de

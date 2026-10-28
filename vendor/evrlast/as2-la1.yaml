@@ -45,7 +45,7 @@ bridgeInterfaces:
 # Battery information (optional)
 battery:
   replaceable: false
-  type: Li-ion
+  type: Li-ion, solar powered
 
 # Operating conditions (optional)
 operatingConditions:

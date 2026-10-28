@@ -70,7 +70,8 @@ function skipField(state, wireType) {
 
 function decodeMeasurement(bytes, start, end, warnings) {
   var state = { bytes: bytes, pos: start, end: end };
-  var measurement = { identifier: 0, value: 0, port: 0 };
+  // The port is optional and only present when the sensor is attached to a numbered port
+  var measurement = { identifier: 0, value: 0 };
   var names = { 1: 'identifier', 2: 'value', 3: 'port' };
 
   while (state.pos < state.end) {
@@ -99,34 +100,52 @@ function decodeUplink(input) {
     return { data: {}, errors: ['payload is empty'] };
   }
 
+  var data = {};
+  var classes = ['A', 'B', 'C'];
+
   try {
     var state = { bytes: bytes, pos: 0, end: bytes.length };
-    var messageLength = readVarint(state);
-    if (state.pos + messageLength > bytes.length) {
-      warnings.push('declared message length ' + messageLength + ' exceeds the payload, decoding the available bytes');
-    } else {
-      state.end = state.pos + messageLength;
-    }
 
-    while (state.pos < state.end) {
-      var tag = readVarint(state);
-      var fieldNumber = Math.floor(tag / 8);
-      var wireType = tag % 8;
-
-      if (fieldNumber === 1 && wireType === 2) {
-        var end = readLengthEnd(state);
-        measurements.push(decodeMeasurement(bytes, state.pos, end, warnings));
-        state.pos = end;
+    // The payload consists of one or more length-delimited Measurement messages
+    while (state.pos < bytes.length) {
+      state.end = bytes.length;
+      var messageLength = readVarint(state);
+      if (state.pos + messageLength > bytes.length) {
+        warnings.push('declared message length ' + messageLength + ' exceeds the payload, decoding the available bytes');
       } else {
-        warnings.push('ignored unknown field ' + fieldNumber + ' (wire type ' + wireType + ')');
-        skipField(state, wireType);
+        state.end = state.pos + messageLength;
       }
+      var messageEnd = state.end;
+
+      while (state.pos < messageEnd) {
+        var tag = readVarint(state);
+        var fieldNumber = Math.floor(tag / 8);
+        var wireType = tag % 8;
+
+        if (fieldNumber === 1 && wireType === 2) {
+          var end = readLengthEnd(state);
+          measurements.push(decodeMeasurement(bytes, state.pos, end, warnings));
+          state.pos = end;
+        } else if (fieldNumber === 2 && wireType === 0) {
+          var deviceClass = classes[readVarint(state)];
+          if (deviceClass !== undefined) {
+            data.switchToClass = deviceClass;
+          }
+        } else if (fieldNumber === 3 && wireType === 0) {
+          data.batchNr = readVarint(state);
+        } else {
+          warnings.push('ignored unknown field ' + fieldNumber + ' (wire type ' + wireType + ')');
+          skipField(state, wireType);
+        }
+      }
+      state.pos = messageEnd;
     }
   } catch (e) {
     return { data: {}, errors: [e.message] };
   }
 
-  var result = { data: { measurementValues: measurements } };
+  data.measurementValues = measurements;
+  var result = { data: data };
   if (warnings.length > 0) {
     result.warnings = warnings;
   }
@@ -139,18 +158,22 @@ function normalizeUplink(input) {
   var warnings = [];
   var air = {};
   var soil = {};
+  var device = {};
 
   function set(target, key, value, measurement) {
     if (target[key] === undefined) {
       target[key] = value;
     } else {
       warnings.push('ignored additional value for ' + key + ' of sensor identifier ' + measurement.identifier +
-        ' on port ' + measurement.port);
+        (measurement.port !== undefined ? ' on port ' + measurement.port : ''));
     }
   }
 
   values.forEach(function (m) {
     switch (m.identifier) {
+      case 3: // battery voltage in V
+        set(device, 'battery', m.value, m);
+        break;
       case 0: // temperature in °C
         set(air, 'temperature', m.value, m);
         break;
@@ -177,6 +200,9 @@ function normalizeUplink(input) {
   }
   if (Object.keys(soil).length > 0) {
     data.push({ soil: soil });
+  }
+  if (device.battery !== undefined) {
+    data.push({ battery: device.battery });
   }
 
   var result = { data: data };
